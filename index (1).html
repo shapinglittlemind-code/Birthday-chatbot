@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Raja Anna's 60th Birthday 🎂</title>
+
+  <!-- Firebase CDN -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    // ✅ PASTE YOUR FIREBASE CONFIG HERE
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window._saveWish = async function(data) {
+      await push(ref(db, "raja_wishes"), data);
+    };
+
+    window._loadWishes = function(callback) {
+      onValue(ref(db, "raja_wishes"), (snapshot) => {
+        const val = snapshot.val();
+        const list = val ? Object.values(val).reverse() : [];
+        callback(list);
+      });
+    };
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(160deg, #0d0020 0%, #1a0040 40%, #0d0030 100%);
+      font-family: Georgia, 'Times New Roman', serif;
+      color: #F5F0FF;
+    }
+
+    @keyframes floatLamp {
+      0%, 100% { transform: translateY(0px) rotate(-5deg); opacity: 0.12; }
+      50% { transform: translateY(-18px) rotate(5deg); opacity: 0.22; }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px #9B59B655, 0 0 40px #9B59B622; }
+      50% { box-shadow: 0 0 30px #FFD70088, 0 0 60px #9B59B644; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .bg-lamps span {
+      position: fixed;
+      font-size: 22px;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatLamp 4s ease-in-out infinite;
+    }
+
+    header {
+      background: linear-gradient(135deg, #3B0070 0%, #6A0DAD 50%, #3B0070 100%);
+      padding: 18px 16px;
+      text-align: center;
+      border-bottom: 3px solid #FFD700;
+      position: relative;
+      z-index: 10;
+    }
+    header .icons { font-size: 24px; margin-bottom: 6px; }
+    header h1 {
+      font-size: 22px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #FFD700, #E0B0FF, #FFD700);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+    }
+    header p { font-size: 12px; color: #FFD70088; margin-top: 4px; }
+
+    .container {
+      max-width: 460px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .card {
+      background: linear-gradient(135deg, #1e004466, #0d002033);
+      border: 1px solid #9B59B633;
+      border-radius: 16px;
+      padding: 24px 20px;
+      animation: slideUp 0.4s ease forwards;
+    }
+    .card.glow { animation: slideUp 0.4s ease forwards, glow 2.5s ease-in-out infinite; border-color: #FFD70055; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* Language Screen */
+    .lang-icon { font-size: 44px; text-align: center; margin-bottom: 14px; animation: pulse 2s ease-in-out infinite; }
+    .lang-intro { font-size: 14px; color: #F5F0FFCC; line-height: 1.75; text-align: center; margin-bottom: 22px; }
+    .lang-label { color: #FFD70099; font-size: 13px; text-align: center; margin-bottom: 14px; }
+    .lang-btns { display: flex; gap: 12px; }
+    .lang-btn {
+      flex: 1; padding: 14px 10px;
+      background: linear-gradient(135deg, #3B0070, #6A0DAD);
+      border: 2px solid #FFD700;
+      border-radius: 12px;
+      color: #FFD700;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .lang-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px #FFD70044; }
+
+    /* Step indicator */
+    .steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+    .step-dot {
+      width: 36px; height: 4px;
+      border-radius: 2px;
+      background: #FFD70022;
+      transition: background 0.3s;
+    }
+    .step-dot.done { background: #FFD700; }
+
+    /* Input area */
+    .question { color: #FFD700; font-size: 16px; line-height: 1.65; margin-bottom: 16px; white-space: pre-line; }
+    input[type="text"], textarea {
+      width: 100%;
+      background: #0d002066;
+      border: 1px solid #9B59B655;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #F5F0FF;
+      font-size: 15px;
+      font-family: Georgia, serif;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: #FFD700;
+      box-shadow: 0 0 14px #FFD70033;
+    }
+    textarea { resize: none; line-height: 1.6; }
+
+    .btn-primary {
+      width: 100%; margin-top: 14px;
+      padding: 14px;
+      background: linear-gradient(135deg, #3B0070, #6A0DAD);
+      border: 2px solid #FFD700;
+      border-radius: 10px;
+      color: #FFD700;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px #FFD70055; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      width: 100%; margin-top: 10px;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid #9B59B655;
+      border-radius: 10px;
+      color: #C39BD3;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+    }
+
+    /* Done screen */
+    .done-lamp { font-size: 52px; text-align: center; margin-bottom: 12px; animation: pulse 2s ease-in-out infinite; }
+    .done-title { color: #FFD700; font-size: 20px; text-align: center; margin-bottom: 10px; }
+    .done-msg { color: #F5F0FFBB; font-size: 14px; text-align: center; line-height: 1.7; margin-bottom: 16px; }
+    .wish-preview {
+      background: #9B59B611;
+      border: 1px solid #9B59B633;
+      border-radius: 10px;
+      padding: 14px;
+      font-style: italic;
+      color: #FFD700CC;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .wish-by { color: #C39BD388; font-size: 12px; text-align: right; }
+
+    /* View all blessings */
+    .view-all-btn {
+      width: 100%; padding: 11px;
+      background: transparent;
+      border: 1px solid #FFD70033;
+      border-radius: 8px;
+      color: #FFD700;
+      font-size: 13px;
+      cursor: pointer;
+      margin-bottom: 16px;
+      font-family: Georgia, serif;
+    }
+    .blessings-title { color: #FFD700; font-size: 18px; margin-bottom: 16px; }
+    .blessing-card {
+      background: linear-gradient(135deg, #1e004466, #0d002033);
+      border: 1px solid #9B59B633;
+      border-left: 3px solid #FFD700;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      animation: slideUp 0.3s ease forwards;
+    }
+    .blessing-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .blessing-name { color: #FFD700; font-size: 15px; font-weight: bold; }
+    .blessing-relation { color: #C39BD399; font-size: 12px; }
+    .blessing-text { color: #F5F0FF; font-size: 14px; line-height: 1.65; }
+    .blessing-time { color: #9B59B644; font-size: 11px; margin-top: 6px; }
+    .no-wishes { color: #FFD70055; text-align: center; padding: 20px; }
+
+    .back-btn {
+      background: transparent; border: none;
+      color: #C39BD3; font-size: 15px;
+      cursor: pointer; margin-bottom: 16px;
+      padding: 0; font-family: Georgia, serif;
+    }
+
+    .footer { text-align: center; margin-top: 28px; color: #FF8C0033; font-size: 12px; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #0d0020; }
+    ::-webkit-scrollbar-thumb { background: #6A0DAD; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- Background floating lamps -->
+<div class="bg-lamps">
+  <span style="left:5%;top:15%;animation-delay:0s">🪔</span>
+  <span style="left:18%;top:55%;animation-delay:0.8s">🪔</span>
+  <span style="left:33%;top:30%;animation-delay:1.5s">🪔</span>
+  <span style="left:55%;top:70%;animation-delay:0.4s">🪔</span>
+  <span style="left:72%;top:20%;animation-delay:1.2s">🪔</span>
+  <span style="left:88%;top:50%;animation-delay:2s">🪔</span>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="icons">🪔 🌸 🪔</div>
+  <h1>ராஜா அண்ணா 60th 🎂</h1>
+  <p>Raja Anna's 60th Birthday Blessings</p>
+</header>
+
+<div class="container">
+
+  <!-- View All Blessings button (shown when wishes exist) -->
+  <button class="view-all-btn" id="viewAllBtn" style="display:none" onclick="showScreen('blessings')">
+    🙏 <span id="wishCount">0</span> blessings received — View All
+  </button>
+
+  <!-- SCREEN: Language Selection -->
+  <div class="screen active" id="screen-lang">
+    <div class="card glow">
+      <div class="lang-icon">🎂</div>
+      <p class="lang-intro" id="introText">
+        Today we celebrate a very special milestone —<br>
+        <strong style="color:#FFD700">Raja Anna's 60th Birthday!</strong><br>
+        Your blessing means the world to him.
+      </p>
+      <p class="lang-label">Choose your language / மொழி தேர்வு செய்யுங்கள்</p>
+      <div class="lang-btns">
+        <button class="lang-btn" onclick="chooseLang('en')">🇬🇧 English</button>
+        <button class="lang-btn" onclick="chooseLang('ta')">🇮🇳 தமிழ்</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: Name -->
+  <div class="screen" id="screen-name">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="card">
+      <p class="question" id="q-name">What is your name?</p>
+      <input type="text" id="input-name" placeholder="Enter your name..." onkeydown="if(event.key==='Enter') nextStep('name')" />
+      <button class="btn-primary" onclick="nextStep('name')" id="btn-name">Next 🙏</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: Relation -->
+  <div class="screen" id="screen-relation">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="card">
+      <p class="question" id="q-relation">What is your relation to Raja Anna?</p>
+      <input type="text" id="input-relation" placeholder="e.g. Brother, Sister, Son, Friend..." onkeydown="if(event.key==='Enter') nextStep('relation')" />
+      <button class="btn-primary" onclick="nextStep('relation')" id="btn-relation">Next 🙏</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: Wish -->
+  <div class="screen" id="screen-wish">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+    </div>
+    <div class="card">
+      <p class="question" id="q-wish">Share your heartfelt blessing for Raja Anna 🙏</p>
+      <textarea id="input-wish" rows="4" placeholder="Type your blessing here..."></textarea>
+      <button class="btn-primary" onclick="nextStep('wish')" id="btn-wish">Send Blessing 🙏</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: Done -->
+  <div class="screen" id="screen-done">
+    <div class="card glow">
+      <div class="done-lamp">🪔</div>
+      <h2 class="done-title" id="done-title">Your blessing has been received!</h2>
+      <p class="done-msg" id="done-msg">Raja Anna will be deeply touched by your love.</p>
+      <div class="wish-preview" id="done-wish-preview"></div>
+      <p class="wish-by" id="done-wish-by"></p>
+    </div>
+    <button class="btn-ghost" onclick="resetForm()" id="btn-another">Add another blessing</button>
+  </div>
+
+  <!-- SCREEN: All Blessings -->
+  <div class="screen" id="screen-blessings">
+    <button class="back-btn" id="backBtn" onclick="showScreen('lang')">← Back</button>
+    <h2 class="blessings-title" id="blessings-title">🪔 All Blessings</h2>
+    <div id="blessings-list">
+      <p class="no-wishes">Loading blessings...</p>
+    </div>
+  </div>
+
+  <p class="footer">🌸 With love & blessings 🌸</p>
+</div>
+
+<script>
+  // State
+  let lang = 'en';
+  let userName = '';
+  let userRelation = '';
+  let allWishes = [];
+
+  const T = {
+    en: {
+      qName: "What is your name?",
+      qRelation: "What is your relation to Raja Anna?\n(e.g. Brother, Sister, Son, Friend...)",
+      qWish: "Please share your heartfelt blessing for Raja Anna 🙏",
+      doneTitle: "🪔 Your blessing has been received!",
+      doneMsg: name => `Thank you ${name}! Raja Anna will be deeply touched by your love.`,
+      btnAnother: "Add another blessing",
+      btnNext: "Next 🙏",
+      btnSend: "Send Blessing 🙏",
+      phName: "Enter your name...",
+      phRelation: "e.g. Brother, Sister, Son, Friend...",
+      phWish: "Type your blessing here...",
+      blessingsTitle: "🪔 All Blessings",
+      back: "← Back",
+      viewAll: count => `🙏 ${count} blessings received — View All`,
+      noWishes: "No blessings yet. Be the first!"
+    },
+    ta: {
+      qName: "உங்கள் பெயர் என்ன?",
+      qRelation: "ராஜா அண்ணாவிற்கு நீங்கள் என்ன உறவு?\n(எ.கா. அண்ணன், அக்கா, மகன், நண்பர்...)",
+      qWish: "ராஜா அண்ணாவிற்கு உங்கள் இதயமார்ந்த ஆசியை பகிருங்கள் 🙏",
+      doneTitle: "🪔 உங்கள் ஆசி பெறப்பட்டது!",
+      doneMsg: name => `நன்றி ${name}! உங்கள் அன்பால் ராஜா அண்ணா மிகவும் மகிழ்வார்.`,
+      btnAnother: "மேலும் ஆசி சேர்க்க",
+      btnNext: "அடுத்து 🙏",
+      btnSend: "ஆசி அனுப்பு 🙏",
+      phName: "உங்கள் பெயர்...",
+      phRelation: "உறவு முறை...",
+      phWish: "உங்கள் ஆசியை இங்கே தட்டச்சு செய்யுங்கள்...",
+      blessingsTitle: "🪔 அனைத்து ஆசிகளும்",
+      back: "← திரும்பு",
+      viewAll: count => `🙏 ${count} ஆசிகள் பெறப்பட்டன — அனைத்தையும் காண`,
+      noWishes: "இன்னும் ஆசிகள் இல்லை. முதலில் இருங்கள்!"
+    }
+  };
+
+  function t() { return T[lang]; }
+
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+  }
+
+  function chooseLang(l) {
+    lang = l;
+    const txt = t();
+    document.getElementById('q-name').textContent = txt.qName;
+    document.getElementById('q-relation').textContent = txt.qRelation;
+    document.getElementById('q-wish').textContent = txt.qWish;
+    document.getElementById('btn-name').textContent = txt.btnNext;
+    document.getElementById('btn-relation').textContent = txt.btnNext;
+    document.getElementById('btn-wish').textContent = txt.btnSend;
+    document.getElementById('input-name').placeholder = txt.phName;
+    document.getElementById('input-relation').placeholder = txt.phRelation;
+    document.getElementById('input-wish').placeholder = txt.phWish;
+    document.getElementById('btn-another').textContent = txt.btnAnother;
+    document.getElementById('blessings-title').textContent = txt.blessingsTitle;
+    document.getElementById('backBtn').textContent = txt.back;
+    showScreen('name');
+    setTimeout(() => document.getElementById('input-name').focus(), 300);
+  }
+
+  function nextStep(step) {
+    if (step === 'name') {
+      const val = document.getElementById('input-name').value.trim();
+      if (!val) { document.getElementById('input-name').focus(); return; }
+      userName = val;
+      showScreen('relation');
+      setTimeout(() => document.getElementById('input-relation').focus(), 300);
+    } else if (step === 'relation') {
+      const val = document.getElementById('input-relation').value.trim();
+      if (!val) { document.getElementById('input-relation').focus(); return; }
+      userRelation = val;
+      showScreen('wish');
+      setTimeout(() => document.getElementById('input-wish').focus(), 300);
+    } else if (step === 'wish') {
+      const val = document.getElementById('input-wish').value.trim();
+      if (!val) { document.getElementById('input-wish').focus(); return; }
+
+      const btn = document.getElementById('btn-wish');
+      btn.disabled = true;
+      btn.textContent = '⏳ Saving...';
+
+      const data = {
+        name: userName,
+        relation: userRelation,
+        wish: val,
+        lang: lang,
+        time: new Date().toLocaleString('en-IN')
+      };
+
+      // Save to Firebase
+      if (window._saveWish) {
+        window._saveWish(data).then(() => {
+          showDone(data);
+        }).catch(() => {
+          // Firebase not configured yet — still show done
+          showDone(data);
+        });
+      } else {
+        showDone(data);
+      }
+    }
+  }
+
+  function showDone(data) {
+    const txt = t();
+    document.getElementById('done-title').textContent = txt.doneTitle;
+    document.getElementById('done-msg').textContent = txt.doneMsg(data.name);
+    document.getElementById('done-wish-preview').textContent = `"${data.wish}"`;
+    document.getElementById('done-wish-by').textContent = `— ${data.name}, ${data.relation}`;
+    showScreen('done');
+  }
+
+  function resetForm() {
+    document.getElementById('input-name').value = '';
+    document.getElementById('input-relation').value = '';
+    document.getElementById('input-wish').value = '';
+    document.getElementById('btn-wish').disabled = false;
+    document.getElementById('btn-wish').textContent = t().btnSend;
+    userName = ''; userRelation = '';
+    showScreen('lang');
+  }
+
+  function renderBlessings(list) {
+    const container = document.getElementById('blessings-list');
+    if (!list || list.length === 0) {
+      container.innerHTML = `<p class="no-wishes">${t().noWishes}</p>`;
+      return;
+    }
+    container.innerHTML = list.map(w => `
+      <div class="blessing-card">
+        <div class="blessing-header">
+          <span class="blessing-name">🙏 ${w.name}</span>
+          <span class="blessing-relation">${w.relation}</span>
+        </div>
+        <p class="blessing-text">${w.wish}</p>
+        <p class="blessing-time">${w.time || ''}</p>
+      </div>
+    `).join('');
+  }
+
+  // Load wishes from Firebase on page load
+  window.addEventListener('load', () => {
+    if (window._loadWishes) {
+      window._loadWishes((list) => {
+        allWishes = list;
+        const btn = document.getElementById('viewAllBtn');
+        if (list.length > 0) {
+          btn.style.display = 'block';
+          btn.textContent = `🙏 ${list.length} blessings received — View All`;
+        }
+        renderBlessings(list);
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
