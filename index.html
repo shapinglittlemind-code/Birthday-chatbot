@@ -8,7 +8,6 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-    import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCx4Ltvs7yscZYoZFlVdnlaFUqaNNtv1EQ",
@@ -22,16 +21,9 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const storage = getStorage(app);
 
-    window._saveWish = async function(data, audioBlob) {
-      let audioUrl = null;
-      if (audioBlob) {
-        const audioRef = sref(storage, 'voice_notes/' + Date.now() + '.webm');
-        await uploadBytes(audioRef, audioBlob);
-        audioUrl = await getDownloadURL(audioRef);
-      }
-      await push(ref(db, "raja_wishes"), { ...data, audioUrl });
+    window._saveWish = async function(data) {
+      await push(ref(db, "raja_wishes"), data);
     };
 
     window._loadWishes = function(callback) {
@@ -45,14 +37,12 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       min-height: 100vh;
       background: linear-gradient(160deg, #0d0020 0%, #1a0040 40%, #0d0030 100%);
       font-family: Georgia, 'Times New Roman', serif;
       color: #F5F0FF;
     }
-
     @keyframes floatLamp {
       0%, 100% { transform: translateY(0px) rotate(-5deg); opacity: 0.12; }
       50% { transform: translateY(-18px) rotate(5deg); opacity: 0.22; }
@@ -75,15 +65,13 @@
     }
     @keyframes recordPulse {
       0%, 100% { box-shadow: 0 0 0 0 #FF444488; }
-      50% { box-shadow: 0 0 0 12px #FF444400; }
+      50% { box-shadow: 0 0 0 14px #FF444400; }
     }
-
     .bg-lamps span {
       position: fixed; font-size: 22px;
       pointer-events: none; z-index: 0;
       animation: floatLamp 4s ease-in-out infinite;
     }
-
     header {
       background: linear-gradient(135deg, #3B0070 0%, #6A0DAD 50%, #3B0070 100%);
       padding: 18px 16px; text-align: center;
@@ -100,13 +88,11 @@
       animation: shimmer 3s linear infinite;
     }
     header p { font-size: 12px; color: #FFD70088; margin-top: 4px; }
-
     .container {
       max-width: 460px; margin: 0 auto;
       padding: 20px 16px 40px;
       position: relative; z-index: 10;
     }
-
     .card {
       background: linear-gradient(135deg, #1e004466, #0d002033);
       border: 1px solid #9B59B633;
@@ -114,10 +100,8 @@
       animation: slideUp 0.4s ease forwards;
     }
     .card.glow { animation: slideUp 0.4s ease forwards, glow 2.5s ease-in-out infinite; border-color: #FFD70055; }
-
     .screen { display: none; }
     .screen.active { display: block; }
-
     .lang-icon { font-size: 44px; text-align: center; margin-bottom: 14px; animation: pulse 2s ease-in-out infinite; }
     .lang-intro { font-size: 14px; color: #F5F0FFCC; line-height: 1.75; text-align: center; margin-bottom: 22px; }
     .lang-label { color: #FFD70099; font-size: 13px; text-align: center; margin-bottom: 14px; }
@@ -131,14 +115,11 @@
       transition: transform 0.15s, box-shadow 0.15s;
     }
     .lang-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px #FFD70044; }
-
     .steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
     .step-dot { width: 28px; height: 4px; border-radius: 2px; background: #FFD70022; transition: background 0.3s; }
     .step-dot.done { background: #FFD700; }
-
     .question { color: #FFD700; font-size: 16px; line-height: 1.65; margin-bottom: 16px; white-space: pre-line; }
     .sub-question { color: #C39BD3; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
-
     input[type="text"], textarea {
       width: 100%; background: #0d002066;
       border: 1px solid #9B59B655; border-radius: 10px;
@@ -151,7 +132,6 @@
       box-shadow: 0 0 14px #FFD70033;
     }
     textarea { resize: none; line-height: 1.6; }
-
     .btn-primary {
       width: 100%; margin-top: 14px; padding: 14px;
       background: linear-gradient(135deg, #3B0070, #6A0DAD);
@@ -162,7 +142,6 @@
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px #FFD70055; }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
     .btn-ghost {
       width: 100%; margin-top: 10px; padding: 12px;
       background: transparent; border: 1px solid #9B59B655;
@@ -176,8 +155,6 @@
       cursor: pointer; font-family: Georgia, serif;
       text-decoration: underline;
     }
-
-    /* Wish type selector */
     .wish-type-btns { display: flex; gap: 12px; margin-bottom: 16px; }
     .wish-type-btn {
       flex: 1; padding: 12px 8px;
@@ -192,8 +169,6 @@
       border-color: #FFD700; color: #FFD700;
       background: linear-gradient(135deg, #3B007044, #6A0DAD22);
     }
-
-    /* Voice recorder */
     .voice-area { text-align: center; padding: 10px 0; }
     .record-btn {
       width: 72px; height: 72px; border-radius: 50%;
@@ -210,13 +185,8 @@
     }
     .record-status { color: #FFD70099; font-size: 13px; margin-bottom: 10px; }
     .record-status.recording { color: #FF6666; }
-    .audio-preview {
-      width: 100%; margin-top: 10px;
-      border-radius: 8px; background: #0d002066;
-    }
     .record-timer { color: #FF6666; font-size: 18px; font-weight: bold; margin-bottom: 8px; }
-
-    /* Done screen */
+    .audio-preview { width: 100%; margin-top: 10px; border-radius: 8px; background: #0d002066; }
     .done-lamp { font-size: 52px; text-align: center; margin-bottom: 12px; animation: pulse 2s ease-in-out infinite; }
     .done-title { color: #FFD700; font-size: 20px; text-align: center; margin-bottom: 10px; }
     .done-msg { color: #F5F0FFBB; font-size: 14px; text-align: center; line-height: 1.7; margin-bottom: 16px; }
@@ -234,8 +204,6 @@
     }
     .memory-label { color: #FFD70088; font-size: 11px; margin-bottom: 4px; letter-spacing: 1px; }
     .wish-by { color: #C39BD388; font-size: 12px; text-align: right; }
-
-    /* View all */
     .view-all-btn {
       width: 100%; padding: 11px; background: transparent;
       border: 1px solid #FFD70033; border-radius: 8px;
@@ -261,17 +229,15 @@
       font-style: italic; line-height: 1.5;
     }
     .blessing-memory-label { font-size: 10px; color: #FFD70066; margin-bottom: 3px; letter-spacing: 1px; font-style: normal; }
-    .blessing-audio { margin-top: 10px; width: 100%; border-radius: 8px; background: #0d002066; }
+    .blessing-audio { margin-top: 10px; width: 100%; border-radius: 8px; }
     .blessing-time { color: #9B59B644; font-size: 11px; margin-top: 6px; }
     .no-wishes { color: #FFD70055; text-align: center; padding: 20px; }
-
     .back-btn {
       background: transparent; border: none;
       color: #C39BD3; font-size: 15px;
       cursor: pointer; margin-bottom: 16px;
       padding: 0; font-family: Georgia, serif;
     }
-
     .footer { text-align: center; margin-top: 28px; color: #9B59B699; font-size: 12px; }
     .creator-box {
       margin-top: 14px; padding: 14px 20px;
@@ -282,7 +248,6 @@
     .created-label { color: #FFD70088; font-size: 11px; margin-bottom: 4px; letter-spacing: 1px; }
     .creator-name { color: #FFD700; font-size: 16px; font-weight: bold; margin-bottom: 2px; }
     .creator-sub { color: #C39BD3; font-size: 12px; font-weight: bold; }
-
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: #0d0020; }
     ::-webkit-scrollbar-thumb { background: #6A0DAD; border-radius: 2px; }
@@ -358,7 +323,7 @@
     </div>
   </div>
 
-  <!-- SCREEN: Wish (typed or voice) -->
+  <!-- SCREEN: Wish -->
   <div class="screen" id="screen-wish">
     <div class="steps">
       <div class="step-dot done"></div>
@@ -372,15 +337,11 @@
         <button class="wish-type-btn active" id="btn-type-text" onclick="switchWishType('text')">✍️ Type</button>
         <button class="wish-type-btn" id="btn-type-voice" onclick="switchWishType('voice')">🎙️ Voice Note</button>
       </div>
-
-      <!-- Typed wish -->
       <div id="typed-wish-area">
         <textarea id="input-wish" rows="4" placeholder="Type your blessing here..."></textarea>
       </div>
-
-      <!-- Voice note -->
       <div id="voice-wish-area" style="display:none">
-        <p class="sub-question" id="voice-hint">Press the mic to start recording your blessing</p>
+        <p class="sub-question" id="voice-hint">Press the mic to record your blessing (max 2 min)</p>
         <div class="voice-area">
           <div class="record-timer" id="record-timer" style="display:none">⏺ 0:00</div>
           <button class="record-btn" id="record-btn" onclick="toggleRecording()">🎙️</button>
@@ -388,7 +349,6 @@
           <audio id="audio-preview" class="audio-preview" controls style="display:none"></audio>
         </div>
       </div>
-
       <button class="btn-primary" onclick="nextStep('wish')" id="btn-wish">Next 🙏</button>
     </div>
   </div>
@@ -415,7 +375,7 @@
     <div class="card glow">
       <div class="done-lamp">🪔</div>
       <h2 class="done-title" id="done-title">Your blessing has been received!</h2>
-      <p class="done-msg" id="done-msg">Raja Anna will be deeply touched by your love.</p>
+      <p class="done-msg" id="done-msg"></p>
       <div class="wish-preview" id="done-wish-preview"></div>
       <div class="memory-preview" id="done-memory-preview" style="display:none">
         <p class="memory-label">💛 YOUR MEMORY</p>
@@ -454,6 +414,7 @@
   let userMemory = '';
   let wishType = 'text';
   let audioBlob = null;
+  let audioBase64 = null;
   let mediaRecorder = null;
   let recordingChunks = [];
   let recordingTimer = null;
@@ -467,9 +428,9 @@
       qWish: "Share your blessing for Raja Anna 🙏",
       qMemory: "💛 Share one memory you cherish with Raja Anna",
       qMemorySub: "A moment, a lesson he taught you, or something you'll never forget...",
-      voiceHint: "Press the mic to start recording your blessing",
+      voiceHint: "Press the mic to record your blessing (max 2 min)",
       doneTitle: "🪔 Your blessing has been received!",
-      doneMsg: name => 'Thank you ' + name + '! Raja Anna will be deeply touched by your love.',
+      doneMsg: function(n) { return 'Thank you ' + n + '! Raja Anna will be deeply touched by your love.'; },
       btnAnother: "Add another blessing",
       btnNext: "Next 🙏",
       btnSend: "Submit 🙏",
@@ -483,17 +444,18 @@
       noWishes: "No blessings yet. Be the first!",
       tapRecord: "Tap to start recording",
       recording: "Recording... tap to stop",
-      recorded: "Voice note recorded! ✅"
+      recorded: "Voice note recorded! ✅",
+      noVoice: "⚠️ Please record a voice note first!"
     },
     ta: {
       qName: "உங்கள் பெயர் என்ன?",
       qRelation: "ராஜா அண்ணாவிற்கு நீங்கள் என்ன உறவு?\n(எ.கா. அண்ணன், அக்கா, மகன், நண்பர்...)",
       qWish: "ராஜா அண்ணாவிற்கு உங்கள் ஆசியை பகிருங்கள் 🙏",
       qMemory: "💛 ராஜா அண்ணாவுடன் ஒரு அன்பான நினைவை பகிருங்கள்",
-      qMemorySub: "ஒரு தருணம், அவர் கற்றுத் தந்த பாடம், அல்லது மறக்க முடியாத ஒரு நினைவு...",
-      voiceHint: "உங்கள் ஆசியை பதிவு செய்ய மைக்கை அழுத்துங்கள்",
+      qMemorySub: "ஒரு தருணம், அவர் கற்றுத் தந்த பாடம், அல்லது மறக்க முடியாத நினைவு...",
+      voiceHint: "உங்கள் ஆசியை பதிவு செய்ய மைக்கை அழுத்துங்கள் (அதிகபட்சம் 2 நிமிடம்)",
       doneTitle: "🪔 உங்கள் ஆசி பெறப்பட்டது!",
-      doneMsg: name => 'நன்றி ' + name + '! உங்கள் அன்பால் ராஜா அண்ணா மிகவும் மகிழ்வார்.',
+      doneMsg: function(n) { return 'நன்றி ' + n + '! உங்கள் அன்பால் ராஜா அண்ணா மிகவும் மகிழ்வார்.'; },
       btnAnother: "மேலும் ஆசி சேர்க்க",
       btnNext: "அடுத்து 🙏",
       btnSend: "அனுப்பு 🙏",
@@ -507,14 +469,15 @@
       noWishes: "இன்னும் ஆசிகள் இல்லை. முதலில் இருங்கள்!",
       tapRecord: "பதிவு தொடங்க அழுத்துங்கள்",
       recording: "பதிவாகிறது... நிறுத்த அழுத்துங்கள்",
-      recorded: "குரல் குறிப்பு பதிவாகியது! ✅"
+      recorded: "குரல் குறிப்பு பதிவாகியது! ✅",
+      noVoice: "⚠️ முதலில் குரல் குறிப்பை பதிவு செய்யுங்கள்!"
     }
   };
 
   function t() { return T[lang]; }
 
   function showScreen(name) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById('screen-' + name).classList.add('active');
   }
 
@@ -528,7 +491,7 @@
 
   function chooseLang(l) {
     lang = l;
-    const txt = t();
+    var txt = t();
     document.getElementById('q-name').textContent = txt.qName;
     document.getElementById('q-relation').textContent = txt.qRelation;
     document.getElementById('q-wish').textContent = txt.qWish;
@@ -549,50 +512,51 @@
     document.getElementById('input-memory').placeholder = txt.phMemory;
     document.getElementById('record-status').textContent = txt.tapRecord;
     showScreen('name');
-    setTimeout(() => document.getElementById('input-name').focus(), 300);
+    setTimeout(function() { document.getElementById('input-name').focus(); }, 300);
   }
 
   function nextStep(step) {
     if (step === 'name') {
-      const val = document.getElementById('input-name').value.trim();
+      var val = document.getElementById('input-name').value.trim();
       if (!val) { document.getElementById('input-name').focus(); return; }
       userName = val;
       showScreen('relation');
-      setTimeout(() => document.getElementById('input-relation').focus(), 300);
+      setTimeout(function() { document.getElementById('input-relation').focus(); }, 300);
+
     } else if (step === 'relation') {
-      const val = document.getElementById('input-relation').value.trim();
+      var val = document.getElementById('input-relation').value.trim();
       if (!val) { document.getElementById('input-relation').focus(); return; }
       userRelation = val;
       showScreen('wish');
-      setTimeout(() => {
-        if (wishType === 'text') document.getElementById('input-wish').focus();
-      }, 300);
+
     } else if (step === 'wish') {
       if (wishType === 'text') {
-        const val = document.getElementById('input-wish').value.trim();
+        var val = document.getElementById('input-wish').value.trim();
         if (!val) { document.getElementById('input-wish').focus(); return; }
         userWish = val;
+        audioBase64 = null;
       } else {
-        if (!audioBlob) {
-          document.getElementById('record-status').textContent = '⚠️ Please record a voice note first!';
+        if (!audioBase64) {
+          document.getElementById('record-status').textContent = t().noVoice;
           return;
         }
         userWish = '🎙️ Voice Note';
       }
       showScreen('memory');
-      setTimeout(() => document.getElementById('input-memory').focus(), 300);
+      setTimeout(function() { document.getElementById('input-memory').focus(); }, 300);
+
     } else if (step === 'memory' || step === 'memory-skip') {
-      userMemory = step === 'memory-skip' ? '' : document.getElementById('input-memory').value.trim();
+      userMemory = (step === 'memory-skip') ? '' : document.getElementById('input-memory').value.trim();
       submitWish();
     }
   }
 
   function submitWish() {
-    const btn = document.getElementById('btn-memory');
+    var btn = document.getElementById('btn-memory');
     btn.disabled = true;
     btn.textContent = '⏳ Saving...';
 
-    const data = {
+    var data = {
       name: userName,
       relation: userRelation,
       wish: userWish,
@@ -602,10 +566,15 @@
       time: new Date().toLocaleString('en-IN')
     };
 
+    // Store audio as base64 directly in database
+    if (wishType === 'voice' && audioBase64) {
+      data.audioBase64 = audioBase64;
+    }
+
     if (window._saveWish) {
-      window._saveWish(data, wishType === 'voice' ? audioBlob : null).then(() => {
+      window._saveWish(data).then(function() {
         showDone(data);
-      }).catch(() => {
+      }).catch(function() {
         showDone(data);
       });
     } else {
@@ -614,23 +583,20 @@
   }
 
   function showDone(data) {
-    const txt = t();
+    var txt = t();
     document.getElementById('done-title').textContent = txt.doneTitle;
     document.getElementById('done-msg').textContent = txt.doneMsg(data.name);
-
     if (data.wishType === 'voice') {
-      document.getElementById('done-wish-preview').textContent = '🎙️ Voice blessing sent!';
+      document.getElementById('done-wish-preview').textContent = '🎙️ Voice blessing sent successfully!';
     } else {
       document.getElementById('done-wish-preview').textContent = '"' + data.wish + '"';
     }
-
     if (data.memory) {
       document.getElementById('done-memory-preview').style.display = 'block';
       document.getElementById('done-memory-text').textContent = data.memory;
     } else {
       document.getElementById('done-memory-preview').style.display = 'none';
     }
-
     document.getElementById('done-wish-by').textContent = '— ' + data.name + ', ' + data.relation;
     showScreen('done');
   }
@@ -643,30 +609,42 @@
     document.getElementById('btn-memory').disabled = false;
     document.getElementById('btn-memory').textContent = t().btnSend;
     document.getElementById('audio-preview').style.display = 'none';
+    document.getElementById('audio-preview').src = '';
     document.getElementById('record-status').textContent = t().tapRecord;
+    document.getElementById('record-timer').style.display = 'none';
     audioBlob = null;
+    audioBase64 = null;
     userName = ''; userRelation = ''; userWish = ''; userMemory = '';
     switchWishType('text');
     showScreen('lang');
   }
 
-  // Voice recording
-  async function toggleRecording() {
+  // Voice recording — saves as base64 in database (no Storage needed)
+  function blobToBase64(blob) {
+    return new Promise(function(resolve) {
+      var reader = new FileReader();
+      reader.onloadend = function() { resolve(reader.result); };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function toggleRecording() {
     if (!isRecording) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
         mediaRecorder = new MediaRecorder(stream);
         recordingChunks = [];
-        mediaRecorder.ondataavailable = e => recordingChunks.push(e.data);
-        mediaRecorder.onstop = () => {
+        mediaRecorder.ondataavailable = function(e) { recordingChunks.push(e.data); };
+        mediaRecorder.onstop = function() {
           audioBlob = new Blob(recordingChunks, { type: 'audio/webm' });
-          const url = URL.createObjectURL(audioBlob);
-          const audio = document.getElementById('audio-preview');
-          audio.src = url;
-          audio.style.display = 'block';
-          document.getElementById('record-status').textContent = t().recorded;
-          document.getElementById('record-status').classList.remove('recording');
-          stream.getTracks().forEach(track => track.stop());
+          blobToBase64(audioBlob).then(function(b64) {
+            audioBase64 = b64;
+            var audio = document.getElementById('audio-preview');
+            audio.src = b64;
+            audio.style.display = 'block';
+            document.getElementById('record-status').textContent = t().recorded;
+            document.getElementById('record-status').classList.remove('recording');
+          });
+          stream.getTracks().forEach(function(track) { track.stop(); });
         };
         mediaRecorder.start();
         isRecording = true;
@@ -676,16 +654,16 @@
         document.getElementById('record-status').textContent = t().recording;
         document.getElementById('record-status').classList.add('recording');
         document.getElementById('record-timer').style.display = 'block';
-        recordingTimer = setInterval(() => {
+        recordingTimer = setInterval(function() {
           recordingSeconds++;
-          const m = Math.floor(recordingSeconds / 60);
-          const s = recordingSeconds % 60;
+          var m = Math.floor(recordingSeconds / 60);
+          var s = recordingSeconds % 60;
           document.getElementById('record-timer').textContent = '⏺ ' + m + ':' + (s < 10 ? '0' : '') + s;
-          if (recordingSeconds >= 120) toggleRecording(); // max 2 min
+          if (recordingSeconds >= 120) { toggleRecording(); }
         }, 1000);
-      } catch (e) {
+      }).catch(function() {
         document.getElementById('record-status').textContent = '⚠️ Microphone permission denied!';
-      }
+      });
     } else {
       clearInterval(recordingTimer);
       mediaRecorder.stop();
@@ -697,17 +675,15 @@
   }
 
   function renderBlessings(list) {
-    const container = document.getElementById('blessings-list');
+    var container = document.getElementById('blessings-list');
     if (!list || list.length === 0) {
       container.innerHTML = '<p class="no-wishes">' + t().noWishes + '</p>';
       return;
     }
-    container.innerHTML = list.map(w => {
-      const memoryHtml = w.memory ?
-        '<div class="blessing-memory"><p class="blessing-memory-label">💛 MEMORY</p>' + w.memory + '</div>' : '';
-      const audioHtml = w.audioUrl ?
-        '<audio class="blessing-audio" controls src="' + w.audioUrl + '"></audio>' : '';
-      const wishText = w.wishType === 'voice' ? '🎙️ Voice blessing' : w.wish;
+    container.innerHTML = list.map(function(w) {
+      var memoryHtml = w.memory ? '<div class="blessing-memory"><p class="blessing-memory-label">💛 MEMORY</p>' + w.memory + '</div>' : '';
+      var audioHtml = w.audioBase64 ? '<audio class="blessing-audio" controls src="' + w.audioBase64 + '"></audio>' : '';
+      var wishText = w.wishType === 'voice' ? '🎙️ Voice blessing' : w.wish;
       return '<div class="blessing-card">' +
         '<div class="blessing-header">' +
           '<span class="blessing-name">🙏 ' + w.name + '</span>' +
@@ -720,10 +696,10 @@
     }).join('');
   }
 
-  window.addEventListener('load', () => {
+  window.addEventListener('load', function() {
     if (window._loadWishes) {
-      window._loadWishes((list) => {
-        const btn = document.getElementById('viewAllBtn');
+      window._loadWishes(function(list) {
+        var btn = document.getElementById('viewAllBtn');
         if (list.length > 0) {
           btn.style.display = 'block';
           btn.textContent = '🙏 ' + list.length + ' blessings received — View All';
