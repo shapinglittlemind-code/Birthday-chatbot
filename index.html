@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Raja Anna's 60th Birthday 🎂</title>
 
-  <!-- Firebase CDN -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getStorage, ref as sref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCx4Ltvs7yscZYoZFlVdnlaFUqaNNtv1EQ",
@@ -22,9 +22,16 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const storage = getStorage(app);
 
-    window._saveWish = async function(data) {
-      await push(ref(db, "raja_wishes"), data);
+    window._saveWish = async function(data, audioBlob) {
+      let audioUrl = null;
+      if (audioBlob) {
+        const audioRef = sref(storage, 'voice_notes/' + Date.now() + '.webm');
+        await uploadBytes(audioRef, audioBlob);
+        audioUrl = await getDownloadURL(audioRef);
+      }
+      await push(ref(db, "raja_wishes"), { ...data, audioUrl });
     };
 
     window._loadWishes = function(callback) {
@@ -66,27 +73,26 @@
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.05); }
     }
+    @keyframes recordPulse {
+      0%, 100% { box-shadow: 0 0 0 0 #FF444488; }
+      50% { box-shadow: 0 0 0 12px #FF444400; }
+    }
 
     .bg-lamps span {
-      position: fixed;
-      font-size: 22px;
-      pointer-events: none;
-      z-index: 0;
+      position: fixed; font-size: 22px;
+      pointer-events: none; z-index: 0;
       animation: floatLamp 4s ease-in-out infinite;
     }
 
     header {
       background: linear-gradient(135deg, #3B0070 0%, #6A0DAD 50%, #3B0070 100%);
-      padding: 18px 16px;
-      text-align: center;
+      padding: 18px 16px; text-align: center;
       border-bottom: 3px solid #FFD700;
-      position: relative;
-      z-index: 10;
+      position: relative; z-index: 10;
     }
     header .icons { font-size: 24px; margin-bottom: 6px; }
     header h1 {
-      font-size: 22px;
-      font-weight: bold;
+      font-size: 22px; font-weight: bold;
       background: linear-gradient(90deg, #FFD700, #E0B0FF, #FFD700);
       background-size: 200% auto;
       -webkit-background-clip: text;
@@ -96,18 +102,15 @@
     header p { font-size: 12px; color: #FFD70088; margin-top: 4px; }
 
     .container {
-      max-width: 460px;
-      margin: 0 auto;
+      max-width: 460px; margin: 0 auto;
       padding: 20px 16px 40px;
-      position: relative;
-      z-index: 10;
+      position: relative; z-index: 10;
     }
 
     .card {
       background: linear-gradient(135deg, #1e004466, #0d002033);
       border: 1px solid #9B59B633;
-      border-radius: 16px;
-      padding: 24px 20px;
+      border-radius: 16px; padding: 24px 20px;
       animation: slideUp 0.4s ease forwards;
     }
     .card.glow { animation: slideUp 0.4s ease forwards, glow 2.5s ease-in-out infinite; border-color: #FFD70055; }
@@ -122,109 +125,143 @@
     .lang-btn {
       flex: 1; padding: 14px 10px;
       background: linear-gradient(135deg, #3B0070, #6A0DAD);
-      border: 2px solid #FFD700;
-      border-radius: 12px;
-      color: #FFD700;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      font-family: Georgia, serif;
+      border: 2px solid #FFD700; border-radius: 12px;
+      color: #FFD700; font-size: 15px; font-weight: bold;
+      cursor: pointer; font-family: Georgia, serif;
       transition: transform 0.15s, box-shadow 0.15s;
     }
     .lang-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px #FFD70044; }
 
     .steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
-    .step-dot { width: 36px; height: 4px; border-radius: 2px; background: #FFD70022; transition: background 0.3s; }
+    .step-dot { width: 28px; height: 4px; border-radius: 2px; background: #FFD70022; transition: background 0.3s; }
     .step-dot.done { background: #FFD700; }
 
     .question { color: #FFD700; font-size: 16px; line-height: 1.65; margin-bottom: 16px; white-space: pre-line; }
+    .sub-question { color: #C39BD3; font-size: 13px; margin-bottom: 16px; line-height: 1.5; }
+
     input[type="text"], textarea {
-      width: 100%;
-      background: #0d002066;
-      border: 1px solid #9B59B655;
-      border-radius: 10px;
-      padding: 12px 14px;
-      color: #F5F0FF;
-      font-size: 15px;
+      width: 100%; background: #0d002066;
+      border: 1px solid #9B59B655; border-radius: 10px;
+      padding: 12px 14px; color: #F5F0FF; font-size: 15px;
       font-family: Georgia, serif;
       transition: border-color 0.3s, box-shadow 0.3s;
     }
     input[type="text"]:focus, textarea:focus {
-      outline: none;
-      border-color: #FFD700;
+      outline: none; border-color: #FFD700;
       box-shadow: 0 0 14px #FFD70033;
     }
     textarea { resize: none; line-height: 1.6; }
 
     .btn-primary {
-      width: 100%; margin-top: 14px;
-      padding: 14px;
+      width: 100%; margin-top: 14px; padding: 14px;
       background: linear-gradient(135deg, #3B0070, #6A0DAD);
-      border: 2px solid #FFD700;
-      border-radius: 10px;
-      color: #FFD700;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      font-family: Georgia, serif;
+      border: 2px solid #FFD700; border-radius: 10px;
+      color: #FFD700; font-size: 16px; font-weight: bold;
+      cursor: pointer; font-family: Georgia, serif;
       transition: transform 0.15s, box-shadow 0.15s;
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px #FFD70055; }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     .btn-ghost {
-      width: 100%; margin-top: 10px;
-      padding: 12px;
-      background: transparent;
-      border: 1px solid #9B59B655;
-      border-radius: 10px;
-      color: #C39BD3;
-      font-size: 14px;
-      cursor: pointer;
-      font-family: Georgia, serif;
+      width: 100%; margin-top: 10px; padding: 12px;
+      background: transparent; border: 1px solid #9B59B655;
+      border-radius: 10px; color: #C39BD3; font-size: 14px;
+      cursor: pointer; font-family: Georgia, serif;
+    }
+    .btn-skip {
+      width: 100%; margin-top: 8px; padding: 10px;
+      background: transparent; border: none;
+      color: #9B59B699; font-size: 13px;
+      cursor: pointer; font-family: Georgia, serif;
+      text-decoration: underline;
     }
 
+    /* Wish type selector */
+    .wish-type-btns { display: flex; gap: 12px; margin-bottom: 16px; }
+    .wish-type-btn {
+      flex: 1; padding: 12px 8px;
+      background: #0d002066;
+      border: 2px solid #9B59B644;
+      border-radius: 12px; color: #C39BD3;
+      font-size: 14px; cursor: pointer;
+      font-family: Georgia, serif;
+      transition: all 0.2s; text-align: center;
+    }
+    .wish-type-btn.active {
+      border-color: #FFD700; color: #FFD700;
+      background: linear-gradient(135deg, #3B007044, #6A0DAD22);
+    }
+
+    /* Voice recorder */
+    .voice-area { text-align: center; padding: 10px 0; }
+    .record-btn {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, #3B0070, #6A0DAD);
+      border: 3px solid #FFD700; font-size: 28px;
+      cursor: pointer; margin: 0 auto 12px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .record-btn.recording {
+      background: linear-gradient(135deg, #8B0000, #CC0000);
+      border-color: #FF4444;
+      animation: recordPulse 1s ease-in-out infinite;
+    }
+    .record-status { color: #FFD70099; font-size: 13px; margin-bottom: 10px; }
+    .record-status.recording { color: #FF6666; }
+    .audio-preview {
+      width: 100%; margin-top: 10px;
+      border-radius: 8px; background: #0d002066;
+    }
+    .record-timer { color: #FF6666; font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+
+    /* Done screen */
     .done-lamp { font-size: 52px; text-align: center; margin-bottom: 12px; animation: pulse 2s ease-in-out infinite; }
     .done-title { color: #FFD700; font-size: 20px; text-align: center; margin-bottom: 10px; }
     .done-msg { color: #F5F0FFBB; font-size: 14px; text-align: center; line-height: 1.7; margin-bottom: 16px; }
     .wish-preview {
-      background: #9B59B611;
-      border: 1px solid #9B59B633;
-      border-radius: 10px;
-      padding: 14px;
-      font-style: italic;
-      color: #FFD700CC;
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 8px;
+      background: #9B59B611; border: 1px solid #9B59B633;
+      border-radius: 10px; padding: 14px;
+      font-style: italic; color: #FFD700CC;
+      font-size: 14px; line-height: 1.6; margin-bottom: 8px;
     }
+    .memory-preview {
+      background: #FFD70011; border: 1px solid #FFD70033;
+      border-radius: 10px; padding: 14px;
+      color: #F5F0FFBB; font-size: 13px;
+      line-height: 1.6; margin-bottom: 8px;
+    }
+    .memory-label { color: #FFD70088; font-size: 11px; margin-bottom: 4px; letter-spacing: 1px; }
     .wish-by { color: #C39BD388; font-size: 12px; text-align: right; }
 
+    /* View all */
     .view-all-btn {
-      width: 100%; padding: 11px;
-      background: transparent;
-      border: 1px solid #FFD70033;
-      border-radius: 8px;
-      color: #FFD700;
-      font-size: 13px;
-      cursor: pointer;
-      margin-bottom: 16px;
-      font-family: Georgia, serif;
+      width: 100%; padding: 11px; background: transparent;
+      border: 1px solid #FFD70033; border-radius: 8px;
+      color: #FFD700; font-size: 13px; cursor: pointer;
+      margin-bottom: 16px; font-family: Georgia, serif;
     }
     .blessings-title { color: #FFD700; font-size: 18px; margin-bottom: 16px; }
     .blessing-card {
       background: linear-gradient(135deg, #1e004466, #0d002033);
-      border: 1px solid #9B59B633;
-      border-left: 3px solid #FFD700;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
+      border: 1px solid #9B59B633; border-left: 3px solid #FFD700;
+      border-radius: 12px; padding: 14px; margin-bottom: 12px;
       animation: slideUp 0.3s ease forwards;
     }
     .blessing-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
     .blessing-name { color: #FFD700; font-size: 15px; font-weight: bold; }
     .blessing-relation { color: #C39BD399; font-size: 12px; }
     .blessing-text { color: #F5F0FF; font-size: 14px; line-height: 1.65; }
+    .blessing-memory {
+      margin-top: 8px; padding: 8px 10px;
+      background: #FFD70011; border-radius: 8px;
+      border-left: 2px solid #FFD70055;
+      color: #FFD700BB; font-size: 13px;
+      font-style: italic; line-height: 1.5;
+    }
+    .blessing-memory-label { font-size: 10px; color: #FFD70066; margin-bottom: 3px; letter-spacing: 1px; font-style: normal; }
+    .blessing-audio { margin-top: 10px; width: 100%; border-radius: 8px; background: #0d002066; }
     .blessing-time { color: #9B59B644; font-size: 11px; margin-top: 6px; }
     .no-wishes { color: #FFD70055; text-align: center; padding: 20px; }
 
@@ -235,37 +272,16 @@
       padding: 0; font-family: Georgia, serif;
     }
 
-    .footer {
-      text-align: center;
-      margin-top: 28px;
-      color: #9B59B699;
-      font-size: 12px;
-    }
+    .footer { text-align: center; margin-top: 28px; color: #9B59B699; font-size: 12px; }
     .creator-box {
-      margin-top: 14px;
-      padding: 14px 20px;
-      border: 1px solid #FFD70033;
-      border-radius: 12px;
+      margin-top: 14px; padding: 14px 20px;
+      border: 1px solid #FFD70033; border-radius: 12px;
       background: linear-gradient(135deg, #1e004466, #0d002033);
       display: inline-block;
     }
-    .created-label {
-      color: #FFD70088;
-      font-size: 11px;
-      margin-bottom: 4px;
-      letter-spacing: 1px;
-    }
-    .creator-name {
-      color: #FFD700;
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 2px;
-    }
-    .creator-sub {
-      color: #C39BD3;
-      font-size: 12px;
-      font-weight: bold;
-    }
+    .created-label { color: #FFD70088; font-size: 11px; margin-bottom: 4px; letter-spacing: 1px; }
+    .creator-name { color: #FFD700; font-size: 16px; font-weight: bold; margin-bottom: 2px; }
+    .creator-sub { color: #C39BD3; font-size: 12px; font-weight: bold; }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: #0d0020; }
@@ -295,6 +311,7 @@
     🙏 <span id="wishCount">0</span> blessings received — View All
   </button>
 
+  <!-- SCREEN: Language -->
   <div class="screen active" id="screen-lang">
     <div class="card glow">
       <div class="lang-icon">🎂</div>
@@ -311,9 +328,11 @@
     </div>
   </div>
 
+  <!-- SCREEN: Name -->
   <div class="screen" id="screen-name">
     <div class="steps">
       <div class="step-dot done"></div>
+      <div class="step-dot"></div>
       <div class="step-dot"></div>
       <div class="step-dot"></div>
     </div>
@@ -324,10 +343,12 @@
     </div>
   </div>
 
+  <!-- SCREEN: Relation -->
   <div class="screen" id="screen-relation">
     <div class="steps">
       <div class="step-dot done"></div>
       <div class="step-dot done"></div>
+      <div class="step-dot"></div>
       <div class="step-dot"></div>
     </div>
     <div class="card">
@@ -337,30 +358,75 @@
     </div>
   </div>
 
+  <!-- SCREEN: Wish (typed or voice) -->
   <div class="screen" id="screen-wish">
     <div class="steps">
       <div class="step-dot done"></div>
       <div class="step-dot done"></div>
       <div class="step-dot done"></div>
+      <div class="step-dot"></div>
     </div>
     <div class="card">
-      <p class="question" id="q-wish">Share your heartfelt blessing for Raja Anna 🙏</p>
-      <textarea id="input-wish" rows="4" placeholder="Type your blessing here..."></textarea>
-      <button class="btn-primary" onclick="nextStep('wish')" id="btn-wish">Send Blessing 🙏</button>
+      <p class="question" id="q-wish">Share your blessing for Raja Anna 🙏</p>
+      <div class="wish-type-btns">
+        <button class="wish-type-btn active" id="btn-type-text" onclick="switchWishType('text')">✍️ Type</button>
+        <button class="wish-type-btn" id="btn-type-voice" onclick="switchWishType('voice')">🎙️ Voice Note</button>
+      </div>
+
+      <!-- Typed wish -->
+      <div id="typed-wish-area">
+        <textarea id="input-wish" rows="4" placeholder="Type your blessing here..."></textarea>
+      </div>
+
+      <!-- Voice note -->
+      <div id="voice-wish-area" style="display:none">
+        <p class="sub-question" id="voice-hint">Press the mic to start recording your blessing</p>
+        <div class="voice-area">
+          <div class="record-timer" id="record-timer" style="display:none">⏺ 0:00</div>
+          <button class="record-btn" id="record-btn" onclick="toggleRecording()">🎙️</button>
+          <p class="record-status" id="record-status">Tap to start recording</p>
+          <audio id="audio-preview" class="audio-preview" controls style="display:none"></audio>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="nextStep('wish')" id="btn-wish">Next 🙏</button>
     </div>
   </div>
 
+  <!-- SCREEN: Memory -->
+  <div class="screen" id="screen-memory">
+    <div class="steps">
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+      <div class="step-dot done"></div>
+    </div>
+    <div class="card">
+      <p class="question" id="q-memory">💛 Share one memory you cherish with Raja Anna</p>
+      <p class="sub-question" id="q-memory-sub">A moment, a lesson he taught you, or something you'll never forget...</p>
+      <textarea id="input-memory" rows="4" placeholder="Type your memory here..."></textarea>
+      <button class="btn-primary" onclick="nextStep('memory')" id="btn-memory">Submit 🙏</button>
+      <button class="btn-skip" onclick="nextStep('memory-skip')" id="btn-skip">Skip this step</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: Done -->
   <div class="screen" id="screen-done">
     <div class="card glow">
       <div class="done-lamp">🪔</div>
       <h2 class="done-title" id="done-title">Your blessing has been received!</h2>
       <p class="done-msg" id="done-msg">Raja Anna will be deeply touched by your love.</p>
       <div class="wish-preview" id="done-wish-preview"></div>
+      <div class="memory-preview" id="done-memory-preview" style="display:none">
+        <p class="memory-label">💛 YOUR MEMORY</p>
+        <p id="done-memory-text"></p>
+      </div>
       <p class="wish-by" id="done-wish-by"></p>
     </div>
     <button class="btn-ghost" onclick="resetForm()" id="btn-another">Add another blessing</button>
   </div>
 
+  <!-- SCREEN: All Blessings -->
   <div class="screen" id="screen-blessings">
     <button class="back-btn" id="backBtn" onclick="showScreen('lang')">← Back</button>
     <h2 class="blessings-title" id="blessings-title">🪔 All Blessings</h2>
@@ -384,42 +450,64 @@
   let lang = 'en';
   let userName = '';
   let userRelation = '';
-  let allWishes = [];
+  let userWish = '';
+  let userMemory = '';
+  let wishType = 'text';
+  let audioBlob = null;
+  let mediaRecorder = null;
+  let recordingChunks = [];
+  let recordingTimer = null;
+  let recordingSeconds = 0;
+  let isRecording = false;
 
   const T = {
     en: {
       qName: "What is your name?",
       qRelation: "What is your relation to Raja Anna?\n(e.g. Brother, Sister, Son, Friend...)",
-      qWish: "Please share your heartfelt blessing for Raja Anna 🙏",
+      qWish: "Share your blessing for Raja Anna 🙏",
+      qMemory: "💛 Share one memory you cherish with Raja Anna",
+      qMemorySub: "A moment, a lesson he taught you, or something you'll never forget...",
+      voiceHint: "Press the mic to start recording your blessing",
       doneTitle: "🪔 Your blessing has been received!",
-      doneMsg: name => `Thank you ${name}! Raja Anna will be deeply touched by your love.`,
+      doneMsg: name => 'Thank you ' + name + '! Raja Anna will be deeply touched by your love.',
       btnAnother: "Add another blessing",
       btnNext: "Next 🙏",
-      btnSend: "Send Blessing 🙏",
+      btnSend: "Submit 🙏",
+      btnSkip: "Skip this step",
       phName: "Enter your name...",
       phRelation: "e.g. Brother, Sister, Son, Friend...",
       phWish: "Type your blessing here...",
+      phMemory: "Type your memory here...",
       blessingsTitle: "🪔 All Blessings",
       back: "← Back",
-      viewAll: count => `🙏 ${count} blessings received — View All`,
-      noWishes: "No blessings yet. Be the first!"
+      noWishes: "No blessings yet. Be the first!",
+      tapRecord: "Tap to start recording",
+      recording: "Recording... tap to stop",
+      recorded: "Voice note recorded! ✅"
     },
     ta: {
       qName: "உங்கள் பெயர் என்ன?",
       qRelation: "ராஜா அண்ணாவிற்கு நீங்கள் என்ன உறவு?\n(எ.கா. அண்ணன், அக்கா, மகன், நண்பர்...)",
-      qWish: "ராஜா அண்ணாவிற்கு உங்கள் இதயமார்ந்த ஆசியை பகிருங்கள் 🙏",
+      qWish: "ராஜா அண்ணாவிற்கு உங்கள் ஆசியை பகிருங்கள் 🙏",
+      qMemory: "💛 ராஜா அண்ணாவுடன் ஒரு அன்பான நினைவை பகிருங்கள்",
+      qMemorySub: "ஒரு தருணம், அவர் கற்றுத் தந்த பாடம், அல்லது மறக்க முடியாத ஒரு நினைவு...",
+      voiceHint: "உங்கள் ஆசியை பதிவு செய்ய மைக்கை அழுத்துங்கள்",
       doneTitle: "🪔 உங்கள் ஆசி பெறப்பட்டது!",
-      doneMsg: name => `நன்றி ${name}! உங்கள் அன்பால் ராஜா அண்ணா மிகவும் மகிழ்வார்.`,
+      doneMsg: name => 'நன்றி ' + name + '! உங்கள் அன்பால் ராஜா அண்ணா மிகவும் மகிழ்வார்.',
       btnAnother: "மேலும் ஆசி சேர்க்க",
       btnNext: "அடுத்து 🙏",
-      btnSend: "ஆசி அனுப்பு 🙏",
+      btnSend: "அனுப்பு 🙏",
+      btnSkip: "இந்த படியை தவிர்க்கவும்",
       phName: "உங்கள் பெயர்...",
       phRelation: "உறவு முறை...",
       phWish: "உங்கள் ஆசியை இங்கே தட்டச்சு செய்யுங்கள்...",
+      phMemory: "உங்கள் நினைவை இங்கே தட்டச்சு செய்யுங்கள்...",
       blessingsTitle: "🪔 அனைத்து ஆசிகளும்",
       back: "← திரும்பு",
-      viewAll: count => `🙏 ${count} ஆசிகள் பெறப்பட்டன — அனைத்தையும் காண`,
-      noWishes: "இன்னும் ஆசிகள் இல்லை. முதலில் இருங்கள்!"
+      noWishes: "இன்னும் ஆசிகள் இல்லை. முதலில் இருங்கள்!",
+      tapRecord: "பதிவு தொடங்க அழுத்துங்கள்",
+      recording: "பதிவாகிறது... நிறுத்த அழுத்துங்கள்",
+      recorded: "குரல் குறிப்பு பதிவாகியது! ✅"
     }
   };
 
@@ -430,21 +518,36 @@
     document.getElementById('screen-' + name).classList.add('active');
   }
 
+  function switchWishType(type) {
+    wishType = type;
+    document.getElementById('btn-type-text').classList.toggle('active', type === 'text');
+    document.getElementById('btn-type-voice').classList.toggle('active', type === 'voice');
+    document.getElementById('typed-wish-area').style.display = type === 'text' ? 'block' : 'none';
+    document.getElementById('voice-wish-area').style.display = type === 'voice' ? 'block' : 'none';
+  }
+
   function chooseLang(l) {
     lang = l;
     const txt = t();
     document.getElementById('q-name').textContent = txt.qName;
     document.getElementById('q-relation').textContent = txt.qRelation;
     document.getElementById('q-wish').textContent = txt.qWish;
+    document.getElementById('q-memory').textContent = txt.qMemory;
+    document.getElementById('q-memory-sub').textContent = txt.qMemorySub;
+    document.getElementById('voice-hint').textContent = txt.voiceHint;
     document.getElementById('btn-name').textContent = txt.btnNext;
     document.getElementById('btn-relation').textContent = txt.btnNext;
-    document.getElementById('btn-wish').textContent = txt.btnSend;
-    document.getElementById('input-name').placeholder = txt.phName;
-    document.getElementById('input-relation').placeholder = txt.phRelation;
-    document.getElementById('input-wish').placeholder = txt.phWish;
+    document.getElementById('btn-wish').textContent = txt.btnNext;
+    document.getElementById('btn-memory').textContent = txt.btnSend;
+    document.getElementById('btn-skip').textContent = txt.btnSkip;
     document.getElementById('btn-another').textContent = txt.btnAnother;
     document.getElementById('blessings-title').textContent = txt.blessingsTitle;
     document.getElementById('backBtn').textContent = txt.back;
+    document.getElementById('input-name').placeholder = txt.phName;
+    document.getElementById('input-relation').placeholder = txt.phRelation;
+    document.getElementById('input-wish').placeholder = txt.phWish;
+    document.getElementById('input-memory').placeholder = txt.phMemory;
+    document.getElementById('record-status').textContent = txt.tapRecord;
     showScreen('name');
     setTimeout(() => document.getElementById('input-name').focus(), 300);
   }
@@ -461,32 +564,52 @@
       if (!val) { document.getElementById('input-relation').focus(); return; }
       userRelation = val;
       showScreen('wish');
-      setTimeout(() => document.getElementById('input-wish').focus(), 300);
+      setTimeout(() => {
+        if (wishType === 'text') document.getElementById('input-wish').focus();
+      }, 300);
     } else if (step === 'wish') {
-      const val = document.getElementById('input-wish').value.trim();
-      if (!val) { document.getElementById('input-wish').focus(); return; }
-
-      const btn = document.getElementById('btn-wish');
-      btn.disabled = true;
-      btn.textContent = '⏳ Saving...';
-
-      const data = {
-        name: userName,
-        relation: userRelation,
-        wish: val,
-        lang: lang,
-        time: new Date().toLocaleString('en-IN')
-      };
-
-      if (window._saveWish) {
-        window._saveWish(data).then(() => {
-          showDone(data);
-        }).catch(() => {
-          showDone(data);
-        });
+      if (wishType === 'text') {
+        const val = document.getElementById('input-wish').value.trim();
+        if (!val) { document.getElementById('input-wish').focus(); return; }
+        userWish = val;
       } else {
-        showDone(data);
+        if (!audioBlob) {
+          document.getElementById('record-status').textContent = '⚠️ Please record a voice note first!';
+          return;
+        }
+        userWish = '🎙️ Voice Note';
       }
+      showScreen('memory');
+      setTimeout(() => document.getElementById('input-memory').focus(), 300);
+    } else if (step === 'memory' || step === 'memory-skip') {
+      userMemory = step === 'memory-skip' ? '' : document.getElementById('input-memory').value.trim();
+      submitWish();
+    }
+  }
+
+  function submitWish() {
+    const btn = document.getElementById('btn-memory');
+    btn.disabled = true;
+    btn.textContent = '⏳ Saving...';
+
+    const data = {
+      name: userName,
+      relation: userRelation,
+      wish: userWish,
+      memory: userMemory,
+      wishType: wishType,
+      lang: lang,
+      time: new Date().toLocaleString('en-IN')
+    };
+
+    if (window._saveWish) {
+      window._saveWish(data, wishType === 'voice' ? audioBlob : null).then(() => {
+        showDone(data);
+      }).catch(() => {
+        showDone(data);
+      });
+    } else {
+      showDone(data);
     }
   }
 
@@ -494,7 +617,20 @@
     const txt = t();
     document.getElementById('done-title').textContent = txt.doneTitle;
     document.getElementById('done-msg').textContent = txt.doneMsg(data.name);
-    document.getElementById('done-wish-preview').textContent = '"' + data.wish + '"';
+
+    if (data.wishType === 'voice') {
+      document.getElementById('done-wish-preview').textContent = '🎙️ Voice blessing sent!';
+    } else {
+      document.getElementById('done-wish-preview').textContent = '"' + data.wish + '"';
+    }
+
+    if (data.memory) {
+      document.getElementById('done-memory-preview').style.display = 'block';
+      document.getElementById('done-memory-text').textContent = data.memory;
+    } else {
+      document.getElementById('done-memory-preview').style.display = 'none';
+    }
+
     document.getElementById('done-wish-by').textContent = '— ' + data.name + ', ' + data.relation;
     showScreen('done');
   }
@@ -503,10 +639,61 @@
     document.getElementById('input-name').value = '';
     document.getElementById('input-relation').value = '';
     document.getElementById('input-wish').value = '';
-    document.getElementById('btn-wish').disabled = false;
-    document.getElementById('btn-wish').textContent = t().btnSend;
-    userName = ''; userRelation = '';
+    document.getElementById('input-memory').value = '';
+    document.getElementById('btn-memory').disabled = false;
+    document.getElementById('btn-memory').textContent = t().btnSend;
+    document.getElementById('audio-preview').style.display = 'none';
+    document.getElementById('record-status').textContent = t().tapRecord;
+    audioBlob = null;
+    userName = ''; userRelation = ''; userWish = ''; userMemory = '';
+    switchWishType('text');
     showScreen('lang');
+  }
+
+  // Voice recording
+  async function toggleRecording() {
+    if (!isRecording) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        recordingChunks = [];
+        mediaRecorder.ondataavailable = e => recordingChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          audioBlob = new Blob(recordingChunks, { type: 'audio/webm' });
+          const url = URL.createObjectURL(audioBlob);
+          const audio = document.getElementById('audio-preview');
+          audio.src = url;
+          audio.style.display = 'block';
+          document.getElementById('record-status').textContent = t().recorded;
+          document.getElementById('record-status').classList.remove('recording');
+          stream.getTracks().forEach(track => track.stop());
+        };
+        mediaRecorder.start();
+        isRecording = true;
+        recordingSeconds = 0;
+        document.getElementById('record-btn').classList.add('recording');
+        document.getElementById('record-btn').textContent = '⏹️';
+        document.getElementById('record-status').textContent = t().recording;
+        document.getElementById('record-status').classList.add('recording');
+        document.getElementById('record-timer').style.display = 'block';
+        recordingTimer = setInterval(() => {
+          recordingSeconds++;
+          const m = Math.floor(recordingSeconds / 60);
+          const s = recordingSeconds % 60;
+          document.getElementById('record-timer').textContent = '⏺ ' + m + ':' + (s < 10 ? '0' : '') + s;
+          if (recordingSeconds >= 120) toggleRecording(); // max 2 min
+        }, 1000);
+      } catch (e) {
+        document.getElementById('record-status').textContent = '⚠️ Microphone permission denied!';
+      }
+    } else {
+      clearInterval(recordingTimer);
+      mediaRecorder.stop();
+      isRecording = false;
+      document.getElementById('record-btn').classList.remove('recording');
+      document.getElementById('record-btn').textContent = '🎙️';
+      document.getElementById('record-timer').style.display = 'none';
+    }
   }
 
   function renderBlessings(list) {
@@ -515,22 +702,27 @@
       container.innerHTML = '<p class="no-wishes">' + t().noWishes + '</p>';
       return;
     }
-    container.innerHTML = list.map(w =>
-      '<div class="blessing-card">' +
+    container.innerHTML = list.map(w => {
+      const memoryHtml = w.memory ?
+        '<div class="blessing-memory"><p class="blessing-memory-label">💛 MEMORY</p>' + w.memory + '</div>' : '';
+      const audioHtml = w.audioUrl ?
+        '<audio class="blessing-audio" controls src="' + w.audioUrl + '"></audio>' : '';
+      const wishText = w.wishType === 'voice' ? '🎙️ Voice blessing' : w.wish;
+      return '<div class="blessing-card">' +
         '<div class="blessing-header">' +
           '<span class="blessing-name">🙏 ' + w.name + '</span>' +
           '<span class="blessing-relation">' + w.relation + '</span>' +
         '</div>' +
-        '<p class="blessing-text">' + w.wish + '</p>' +
+        '<p class="blessing-text">' + wishText + '</p>' +
+        audioHtml + memoryHtml +
         '<p class="blessing-time">' + (w.time || '') + '</p>' +
-      '</div>'
-    ).join('');
+      '</div>';
+    }).join('');
   }
 
   window.addEventListener('load', () => {
     if (window._loadWishes) {
       window._loadWishes((list) => {
-        allWishes = list;
         const btn = document.getElementById('viewAllBtn');
         if (list.length > 0) {
           btn.style.display = 'block';
